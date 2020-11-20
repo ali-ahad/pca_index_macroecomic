@@ -131,19 +131,16 @@ nrow(three_month_yields)
 gdp = import_list(paste(dataset_folder_path, "/", files[[16]], sep = ""))
 gdp_data = tail(gdp$Data, 129)
 gdp_data = rbind(gdp_data, c(NA, NA, NA))
-gdp_data$
+gdp_data[,3]
 nrow(gdp_data)
 
-stock_vs_mefactors = data.frame(avg_earnings_manu$Date, as.numeric(sp500_index$Close), gdp_data$`Monthly Real GDP Index`, three_month_yields$`Three Month Yields (%)`,
-                                real_er$`Real Effective Exchange Rate (%)`, ppi_manufacturing$`PPI - Manufacturing`, 
-                                ppi_investments$`PPI - Investments`, ppi_commodities$`PPI - Commodities`, savings_rate$`Personal Savings Rate (%)`,
-                                one_month_libor$`One Month Libor (%)`, mv_fed_debt$`Market Value of Federal Debt (billions)`, labour_participation_rate$`Labor Participation Rate (%)`,
-                                unemployment_rate$`Unemployment Rate (%)`, industrial_pi$`Industrial Production Index`, imports_pi$`Imports Price Index`,
-                                fed_fund_rate$`Effective Fed Funds Rate (%)`, exports_pi$`Exports Price Index`, epu_fiscal$`EPU Index - Fiscal`,
-                                emv_politics$`EMV - Politics`, emv_overall$`EMV - Overall`, emv_immigration$`EMV - Immigration`, emv_disease$`EMV - Disease`,
-                                emv_deficit$`EMV - Deficit`, cpi_urban$`CPI - Urban`, avg_weekly_private$`AWH - Private`, 
-                                avg_weekly_manu$`AWH - Manufacturing`, avg_earnings_private$`AWE - Private (In Dollars)`, avg_earnings_manu$`AWE - Manufacturing (In Dollars)`)
-
+stock_vs_mefactors = data.frame(avg_earnings_manu$Date, as.numeric(sp500_index$Close), gdp_data[,3], three_month_yields[,2],
+                                real_er[,2], ppi_manufacturing[,2], ppi_investments[,2], ppi_commodities[,2], savings_rate[,2],
+                                one_month_libor[,2], mv_fed_debt[,2], labour_participation_rate[,2], unemployment_rate[,2], 
+                                industrial_pi[,2], imports_pi[,2], fed_fund_rate[,2], exports_pi[,2], epu_fiscal[,2],
+                                emv_politics[,2], emv_overall[,2], emv_immigration[,2], emv_disease[,2], emv_deficit[,2], 
+                                cpi_urban[,2], avg_weekly_private[,2], avg_weekly_manu[,2], avg_earnings_private[,2], avg_earnings_manu[,2])
+colnames(stock_vs_mefactors)
 stock_vs_mefactors
 
 # Clear console and environment
