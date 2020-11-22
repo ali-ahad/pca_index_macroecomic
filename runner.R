@@ -40,7 +40,6 @@ sp500 = (sp500 - mean(sp500)) / sd(sp500)
 
 mefactors_pc = prcomp(mefactors, center = TRUE, scale. = TRUE)
 
-
 # Orthogonality check
 res = cor(mefactors_pc$scores, method = "pearson")
 corrplot(res, type = "upper", order = "hclust", tl.col = "black", tl.srt = 90)
