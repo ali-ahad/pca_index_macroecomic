@@ -56,14 +56,15 @@ X_test = as.matrix(X_test)
 mefactors_pc = princomp(X_train,cor=T)
 
 ##Extracting PCs up to 90% of total variance 
-n = length(mefactors_pc$sdev[cumsum((mefactors_pc$sdev)^2)/ncol(X_train)<0.95])+1
+n = length(mefactors_pc$sdev[cumsum((mefactors_pc$sdev)^2)/ncol(X_train)<0.99])+1
 pc = mefactors_pc$loadings[,1:n]
+pc
 
 ##Converting X into PC values
 PCValue = X_train%*%pc
 
 ##the regression on extracted PCs
-fit1<-lm(y_train~PCValue)
+fit1<-lm(y_train~PCValue) 
 beta=fit1$coefficients[2:length(fit1$coefficients)]
 
 ##Calculating the original alpha

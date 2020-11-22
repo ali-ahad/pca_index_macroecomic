@@ -18,7 +18,7 @@ dataset_creator = function(folder_path, file_name, val_col_title, date_select) {
 
 dataset_folder_path = paste(cur_dir, "/datasets", sep = "")
 files = list.files(dataset_folder_path)
-sp500_index = get.hist.quote(instrument = "^GSPC", start = "2010-01-01", end = "2020-11-01", quote = "Close", provider = "yahoo", compression = "m")
+sp500_index = get.hist.quote(instrument = "^GSPC", start = "2010-02-01", end = "2020-11-01", quote = "Close", provider = "yahoo", compression = "m")
 
 avg_earnings_manu = dataset_creator(dataset_folder_path, files[[1]], "AWE - Manufacturing (In Dollars)", "2010-01-01")
 avg_earnings_private = dataset_creator(dataset_folder_path, files[[2]], "AWE - Private (In Dollars)", "2010-01-01")
