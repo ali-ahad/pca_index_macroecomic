@@ -26,8 +26,21 @@ train_test_split = function(mefactors, index, train_size) {
   return(list("x_train" = x_train, "x_test" = x_test, "y_train" = y_train, "y_test" = y_test))
 }
 
+# Function to reduce PCs and perform multiple linear regression on them
+optim_linear_reg = function(data, pc_values, col_to_remove) {
+  optim_pc_values = pc_values[,-col_to_remove]
+  lreg = lm(data ~ optim_pc_values)
+  summary = summary(lreg) 
+  return (list("new_pc_vals" = optim_pc_values, "summary" = summary, "reg_object" = lreg))
+}
 
-cur_dir <- getwd()
+# Function to find the regression accuracy by computing RSS
+regression_accuracy = function(reg, index_compare) {
+  RSS <- sum((reg$fitted.values-index_compare)^2)
+  return (RSS)
+}
+
+cur_dir = "/Users/ccm/Desktop/RMSC4002/pca_index_macroecomic-master"
 load(paste(cur_dir, "/scrapped_data.RData", sep = ""))
 
 set.seed(17)
@@ -67,7 +80,7 @@ factors_test = as.matrix(factors_test)
 
 # Normalize independent variables
 index_train = (index_train - mean(index_train)) / sd(index_train)
-index_test = (index_test - mean(index_train)) / sd(index_train)
+index_test = (index_test - mean(index_test)) / sd(index_test)
 
 # Get the PCs on factor training set and extract PCs upto 99 % of total variance explained
 mefactors_pc = princomp(factors_train, cor = T)
@@ -80,21 +93,36 @@ pc_values = factors_train%*%pc
 ############################################
 # ...... Multiple Linear Regression ...... #
 ############################################
-linear_reg<-lm(index_train~pc_values) 
+first_reg<-lm(index_train~pc_values) 
+summary(first_reg)
+acc1=regression_accuracy(first_reg, index_train)
+
+# Removing PC 3 as it has highest p-values
+second_reg<-optim_linear_reg(index_train,pc_values,3)
+summary(second_reg)
+acc2=regression_accuracy(second_reg, index_train)
+
+# Removing PC 4 as it has highest p-values
+third_reg<-optim_linear_reg(index_train,second_reg$new_pc_vals,3)
+summary(third_reg)
+acc3=regression_accuracy(third_reg, index_train)
 
 # Calculating the beta and original alpha value
-beta = linear_reg$coefficients[2 : length(linear_reg$coefficients)]
-alpha = pc %*% beta
+beta = third_reg$reg_object$coefficients[2 : length(third_reg$reg_object$coefficients)]
+beta<-as.matrix(beta)
+pc_chosen=pc[, -c(3,4)]
+alpha = pc_chosen %*% beta
 
 # Fit the regression to train set and compute its rss
-index_fit = factors_train %*% alpha
+index_fit = factors_train %*% alpha+third_reg$reg_object$coefficients[1]
 rss_train = sum((index_train - index_fit)^2)
 
 # Fit the regression to test set to predict and compute its rss
-index_pred = factors_test %*% alpha
+index_pred = factors_test %*% alpha+third_reg$reg_object$coefficients[1]
 rss_test = sum((index_test - index_pred)^2)
 rss_test
 
 # Clear console and environment
 rm(list=ls())
 cat("\014")  # ctrl+L
+
