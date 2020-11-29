@@ -143,6 +143,89 @@ tbl
 accuracy_test = (tbl[1, ][1] + tbl[2, ][2]) / length(index_test)
 accuracy_test
 
+################################################
+# ..........Related Trading Strategy ......... #
+################################################
+# Getting the Stock price of TQQQ and SQQQ
+SPXL_price = get.hist.quote(instrument = "SPXL", start = "2012-03-02", end = "2020-10-02", quote = "Close", provider = "yahoo", compression = "m")
+SPXS_price = get.hist.quote(instrument = "SPXS", start = "2012-03-02", end = "2020-10-02", quote = "Close", provider = "yahoo", compression = "m")
+SPY_price = get.hist.quote(instrument = "SPY", start = "2012-03-02", end = "2020-10-02", quote = "Close", provider = "yahoo", compression = "m")
+SPXL_price_vector<-as.vector(SPXL_price)
+SPXS_price_vector<-as.vector(SPXS_price)
+SPY_price_vector<-as.vector(SPY_price)
+a<-(lag(SPXL_price_vector)-SPXL_price_vector) / SPXL_price_vector
+b<-(lag(SPXS_price_vector)-SPXS_price_vector) / SPXS_price_vector
+c<-(lag(SPY_price_vector)-SPY_price_vector) / SPY_price_vector
+SPXL_price_monthly_return<-a[-1]
+SPXS_price_monthly_return<-b[-1]
+SPY_price_monthly_return<-c[-1]
+
+##Calculating the performance of the strategy 1 
+ret<-c()
+for (i in 1:length(pr_test)){
+  r<-ifelse(pr_test[i]==1,SPXL_price_monthly_return[i],SPXS_price_monthly_return[i])
+  ret<-c(ret,r)
+}
+cum_performance_1<-cumprod(1+ret)
+
+Period_return_1<-cum_performance_1[length(cum_performance_1)]-1
+GM_Monthly_return_1<-(cum_performance_2[length(cum_performance_1)])^(1/length(cum_performance_1))-1
+
+##Calculating the performance of the strategy 2
+ret<-c()
+for (i in 1:length(pr_test)){
+  r<-ifelse(pr_test[i]==1,SPXL_price_monthly_return[i],0)
+  ret<-c(ret,r)
+}
+cum_performance_2<-cumprod(1+ret)
+
+Period_return_2<-cum_performance_2[length(cum_performance_2)]-1
+GM_Monthly_return_2<-(cum_performance_1[length(cum_performance_2)])^(1/length(cum_performance_2))-1
+
+##Calculating the performance of the strategy 3
+ret<-c()
+for (i in 1:length(pr_test)){
+  r<-ifelse(pr_test[i]==1,SPXL_price_monthly_return[i],SPY_price_monthly_return[i])
+  ret<-c(ret,r)
+}
+cum_performance_3<-cumprod(1+ret)
+
+Period_return_3<-cum_performance_3[length(cum_performance_3)]-1
+GM_Monthly_return_3<-(cum_performance_3[length(cum_performance_3)])^(1/length(cum_performance_3))-1
+
+cum_performance_1_ts<-as.ts(cum_performance_1)
+cum_performance_2_ts<-as.ts(cum_performance_2)
+cum_performance_3_ts<-as.ts(cum_performance_3)
+
+
+y_max<-max(max(cum_performance_1_ts),max(cum_performance_2_ts),max(cum_performance_3_ts))
+y_min<-min(min(cum_performance_1_ts),min(cum_performance_2_ts),min(cum_performance_3_ts))
+
+n<-"Strategies Performance"
+
+pdf(n)
+
+plot(cum_performance_1_ts ,ylim=c(y_min,y_max),xlab = 'Time(months)',ylab = 'Cumulative Performance', col='red')
+title(n)
+lines(cum_performance_2_ts,col='blue')
+lines(cum_performance_3_ts,col='green')
+legend("topleft",legend = c("SPXL and SPXS","SPXL only","SPXL and SPY"),col = c("red","blue","green"), fill = c("red","blue","green"))
+
+dev.off()
+
+df<-data_frame("SPXL and SPXS"=c(Period_return_1,GM_Monthly_return_1),
+               "SPXL only"=c(Period_return_2,GM_Monthly_return_2),
+               "SPXL and SPY"=c(Period_return_3,GM_Monthly_return_3))
+df<-t(df)
+
+colnames(df) = c("Period Return","GM Daily Return")
+
+
+
+print(df)
+
+write.xlsx(df,"Performance.xlsx")
+
 # Clear console and environment
 rm(list=ls())
 cat("\014")  # ctrl+L
